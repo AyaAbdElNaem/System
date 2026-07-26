@@ -1,0 +1,74 @@
+"""
+04_vector_representation.py
+=============================
+Stage 4 of the RAG pipeline: VECTOR REPRESENTATION.
+
+Wraps the SentenceTransformer model ("all-MiniLM-L6-v2", same model as the
+original notebook) as a small, cached, Chroma-compatible embedding
+function, plus helpers to embed raw text lists directly (used by
+06_retrieve_context.py to build the BM25 lexical index over the same
+corpus that lives in ChromaDB).
+"""
+
+from __future__ import annotations
+
+from functools import lru_cache
+from typing import List
+
+from sentence_transformers import SentenceTransformer
+
+try:
+    from config import EMBEDDING_MODEL_NAME
+except ImportError:
+    EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
+
+
+@lru_cache(maxsize=1)
+def get_sentence_transformer(model_name: str = EMBEDDING_MODEL_NAME) -> SentenceTransformer:
+    """
+    Load (and cache) the SentenceTransformer model.
+
+    ``lru_cache`` ensures the ~90MB model is loaded into memory only once
+    per process, regardless of how many times this function is called
+    (important for Streamlit reruns).
+    """
+    return SentenceTransformer(model_name)
+
+
+class SentenceTransformerEmbeddingFunction:
+    """
+    Minimal embedding function compatible with ChromaDB's
+    ``EmbeddingFunction`` protocol (a callable that takes a list of texts
+    and returns a list of embedding vectors).
+    """
+
+    def __init__(self, model_name: str = EMBEDDING_MODEL_NAME):
+        self.model_name = model_name
+
+    def __call__(self, input: List[str]) -> List[List[float]]:  # noqa: A002 (chroma's expected arg name)
+        model = get_sentence_transformer(self.model_name)
+        embeddings = model.encode(
+            list(input), convert_to_numpy=True, normalize_embeddings=True
+        )
+        return embeddings.tolist()
+
+    def name(self) -> str:
+        return f"sentence-transformers:{self.model_name}"
+
+
+def embed_texts(texts: List[str], model_name: str = EMBEDDING_MODEL_NAME):
+    """Embed a batch of texts, returning a normalized numpy array."""
+    model = get_sentence_transformer(model_name)
+    return model.encode(texts, convert_to_numpy=True, normalize_embeddings=True)
+
+
+def embed_query(query: str, model_name: str = EMBEDDING_MODEL_NAME):
+    """Embed a single query string, returning a normalized numpy vector."""
+    model = get_sentence_transformer(model_name)
+    return model.encode([query], convert_to_numpy=True, normalize_embeddings=True)[0]
+
+
+if __name__ == "__main__":
+    vec = embed_query("What do puppies need to eat?")
+    print(f"Model: {EMBEDDING_MODEL_NAME}")
+    print(f"Embedding dimension: {vec.shape[0]}")

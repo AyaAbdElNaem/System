@@ -1,0 +1,26 @@
+# Secrets - never commit these
+.env
+.streamlit/secrets.toml
+
+# Generated vector database (rebuilt automatically from the Markdown files)
+database/chroma_db/*
+!database/chroma_db/.gitkeep
+database/source_hash.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Streamlit
+.streamlit/*
+!.streamlit/config.toml

@@ -1,0 +1,277 @@
+/* ==========================================================================
+   PetNutri - custom theme
+   Palette:
+     --cream        #F8F4EA   page background
+     --ink           #2B2A28   primary text
+     --ink-soft      #6B675F   secondary text
+     --olive         #5C6B2F   primary CTA (Start AI Consultation)
+     --olive-dark    #4A5626   hover state
+     --terracotta    #CB6E43   accent (headline highlight, links, back button)
+     --terracotta-soft #D9B39C consult button background
+     --badge-bg      #E7E3D3   pill badge background
+     --card-bg       #FFFFFF   chat bubble / input card background
+     --border        #E7E1D2   hairline borders
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+    --cream: #F8F4EA;
+    --ink: #2B2A28;
+    --ink-soft: #6B675F;
+    --olive: #5C6B2F;
+    --olive-dark: #4A5626;
+    --terracotta: #CB6E43;
+    --terracotta-soft: #D9A67E;
+    --badge-bg: #E7E3D3;
+    --card-bg: #FFFFFF;
+    --border: #E7E1D2;
+}
+
+html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
+    background-color: var(--cream) !important;
+}
+
+[data-testid="stHeader"] { background-color: transparent !important; }
+
+.block-container {
+    max-width: 760px;
+    padding-top: 2.5rem;
+    padding-bottom: 8rem;
+}
+
+* { font-family: 'Inter', sans-serif; }
+
+h1, h2, h3, .pn-heading {
+    font-family: 'Baloo 2', sans-serif !important;
+    color: var(--ink) !important;
+    font-weight: 700 !important;
+}
+
+/* ---------- Top bar ---------- */
+.pn-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.2rem;
+}
+.pn-logo {
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.pn-back-link {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    color: var(--terracotta);
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+/* ---------- Home hero ---------- */
+.pn-hero-title {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 2.6rem;
+    line-height: 1.15;
+    font-weight: 800;
+    color: var(--ink);
+    margin-bottom: 1rem;
+}
+.pn-hero-title .accent { color: var(--terracotta); }
+
+.pn-hero-subtitle {
+    font-size: 1.05rem;
+    color: var(--ink-soft);
+    max-width: 460px;
+    margin-bottom: 1.8rem;
+    line-height: 1.55;
+}
+
+.pn-hero-image {
+    border-radius: 20px;
+    overflow: hidden;
+    margin-top: 1.5rem;
+    border: 1px solid var(--border);
+}
+
+/* ---------- Badge pill ---------- */
+.pn-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background-color: var(--badge-bg);
+    color: var(--ink);
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    margin-bottom: 1.1rem;
+}
+
+.pn-chat-title {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 0.3rem;
+}
+.pn-chat-subtitle {
+    color: var(--ink-soft);
+    margin-bottom: 2rem;
+}
+
+/* ---------- Primary CTA button (olive) - home page "Start AI Consultation" ---------- */
+div.stButton button[kind="primary"] {
+    background-color: var(--olive) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 999px !important;
+    padding: 0.75rem 1.8rem !important;
+    font-weight: 700 !important;
+    font-size: 1rem !important;
+    box-shadow: 0 6px 16px rgba(92, 107, 47, 0.25);
+}
+div.stButton button[kind="primary"]:hover { background-color: var(--olive-dark) !important; }
+
+/* Secondary / sidebar buttons */
+div.stButton button[kind="secondary"] {
+    background-color: #fff !important;
+    color: var(--ink) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+}
+
+/* Chat form's "Consult AI" submit button - terracotta, overrides primary blue */
+[data-testid="stFormSubmitButton"] button {
+    background-color: var(--terracotta-soft) !important;
+    color: #4A2E1B !important;
+    border: none !important;
+    border-radius: 999px !important;
+    font-weight: 700 !important;
+}
+[data-testid="stFormSubmitButton"] button:hover {
+    background-color: var(--terracotta) !important;
+    color: #fff !important;
+}
+
+/* ---------- Chat bubbles ---------- */
+.pn-bubble-user {
+    background-color: var(--olive);
+    color: #fff;
+    padding: 0.75rem 1.1rem;
+    border-radius: 16px 16px 4px 16px;
+    margin: 0.4rem 0;
+    max-width: 80%;
+    margin-left: auto;
+    font-size: 0.96rem;
+    line-height: 1.5;
+}
+.pn-bubble-assistant {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
+    color: var(--ink);
+    padding: 0.9rem 1.15rem;
+    border-radius: 16px 16px 16px 4px;
+    margin: 0.4rem 0;
+    max-width: 88%;
+    font-size: 0.96rem;
+    line-height: 1.6;
+    box-shadow: 0 2px 8px rgba(43, 42, 40, 0.04);
+}
+.pn-bubble-casual {
+    background-color: var(--badge-bg);
+    border: 1px solid var(--border);
+}
+
+/* ---------- Fixed bottom input card ---------- */
+/* .pn-input-anchor { height: 1px; }
+div[data-testid="stForm"] {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(700px, 92vw);
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 0.85rem 1rem;
+    box-shadow: 0 10px 30px rgba(43, 42, 40, 0.10);
+    z-index: 999;
+} */
+ /* ---------- Input card (Natural Flow - No Fixed Screen Overlay) ---------- */
+.pn-input-anchor { display: none; }
+
+div[data-testid="stForm"] {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 760px;
+    margin: 1.5rem auto !important;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 0.85rem 1rem;
+    box-shadow: 0 4px 12px rgba(43, 42, 40, 0.05);
+    z-index: 1;
+}
+div[data-testid="stForm"] textarea,
+div[data-testid="stForm"] input {
+    border: none !important;
+    background: transparent !important;
+    font-size: 0.95rem !important;
+}
+
+/* Consult button (terracotta) inside the form */
+.pn-consult-btn button {
+    background-color: var(--terracotta-soft) !important;
+    color: #4A2E1B !important;
+    border: none !important;
+    border-radius: 999px !important;
+    font-weight: 700 !important;
+}
+.pn-consult-btn button:hover { background-color: var(--terracotta) !important; color: #fff !important; }
+
+/* ---------- Sidebar ---------- */
+[data-testid="stSidebar"] {
+    background-color: #FDFBF6 !important;
+    border-right: 1px solid var(--border);
+}
+.pn-sidebar-title {
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 0.4rem;
+}
+.pn-status-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    padding: 0.25rem 0;
+    color: var(--ink-soft);
+    border-bottom: 1px dashed var(--border);
+}
+.pn-status-row span.value { color: var(--ink); font-weight: 600; }
+.pn-status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+}
+.pn-status-dot.ok { background-color: var(--olive); }
+.pn-status-dot.bad { background-color: #C0392B; }
+
+.pn-source-card {
+    background-color: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.4rem;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+}
+.pn-source-card b { color: var(--ink); }
