@@ -1,13 +1,3 @@
-"""
-config.py
-=========
-Central configuration for the PetNutri RAG application.
-
-Every other module (01_documents.py ... streamlit_app.py) imports paths and
-constants from here instead of hard-coding them, so the whole project has a
-single source of truth for file locations and model/API settings.
-"""
-
 from __future__ import annotations
 
 import os
@@ -27,9 +17,7 @@ ASSETS_DIR: Path = BASE_DIR / "assets"
 STYLE_CSS_PATH: Path = ASSETS_DIR / "style.css"
 
 # --------------------------------------------------------------------------
-# Retrieval / embedding settings (kept identical to the original notebook
-# so retrieval behavior does not change: chunk_size=800, overlap=100,
-# model="all-MiniLM-L6-v2")
+# Retrieval 
 # --------------------------------------------------------------------------
 EMBEDDING_MODEL_NAME: str = "all-MiniLM-L6-v2"
 CHUNK_SIZE: int = 800
@@ -40,7 +28,8 @@ DEFAULT_TOP_K: int = 6
 DEFAULT_ALPHA: float = 0.5          # hybrid weighting: alpha*lexical + (1-alpha)*semantic
 DEFAULT_MAX_CHUNKS: int = 4         # max chunks packed into the final context
 DEFAULT_WORD_BUDGET: int = 350      # max words packed into the final context
-
+DEFAULT_MIN_ABSOLUTE_SCORE: float = 0.12
+DEFAULT_MIN_SCORE_RATIO: float = 0.4
 # --------------------------------------------------------------------------
 # OpenRouter (LLM generation) settings
 # --------------------------------------------------------------------------

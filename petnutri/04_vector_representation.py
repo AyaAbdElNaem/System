@@ -1,15 +1,3 @@
-"""
-04_vector_representation.py
-=============================
-Stage 4 of the RAG pipeline: VECTOR REPRESENTATION.
-
-Wraps the SentenceTransformer model ("all-MiniLM-L6-v2", same model as the
-original notebook) as a small, cached, Chroma-compatible embedding
-function, plus helpers to embed raw text lists directly (used by
-06_retrieve_context.py to build the BM25 lexical index over the same
-corpus that lives in ChromaDB).
-"""
-
 from __future__ import annotations
 
 from functools import lru_cache
@@ -25,23 +13,12 @@ except ImportError:
 
 @lru_cache(maxsize=1)
 def get_sentence_transformer(model_name: str = EMBEDDING_MODEL_NAME) -> SentenceTransformer:
-    """
-    Load (and cache) the SentenceTransformer model.
-
-    ``lru_cache`` ensures the ~90MB model is loaded into memory only once
-    per process, regardless of how many times this function is called
-    (important for Streamlit reruns).
-    """
+    
     return SentenceTransformer(model_name)
 
 
 class SentenceTransformerEmbeddingFunction:
-    """
-    Minimal embedding function compatible with ChromaDB's
-    ``EmbeddingFunction`` protocol (a callable that takes a list of texts
-    and returns a list of embedding vectors).
-    """
-
+    
     def __init__(self, model_name: str = EMBEDDING_MODEL_NAME):
         self.model_name = model_name
 

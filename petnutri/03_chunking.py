@@ -1,25 +1,3 @@
-"""
-03_chunking.py
-===============
-Stage 3 of the RAG pipeline: CHUNKING.
-
-Two-pass, markdown-aware chunking (identical parameters to the original
-notebook so retrieval behavior is preserved):
-
-1. ``MarkdownHeaderTextSplitter`` splits each document along its
-   #, ##, ### headers, so every chunk keeps track of the section it came
-   from.
-2. ``RecursiveCharacterTextSplitter`` (chunk_size=800, chunk_overlap=100)
-   further splits any oversized sections, using paragraph/line/word
-   boundaries in that order of preference.
-
-Each resulting chunk keeps the full document metadata (title, source,
-category, last_updated, target_species, url_reference) plus a
-``search_text`` field that prepends header + title + category context,
-exactly like the original ``search_text`` column - this is what improved
-retrieval quality in the original evaluation.
-"""
-
 from __future__ import annotations
 
 from typing import List
@@ -60,23 +38,7 @@ _text_splitter = RecursiveCharacterTextSplitter(
 
 
 def chunk_documents(documents: List[dict]) -> List[dict]:
-    """
-    Split every document into retrieval-ready chunks.
-
-    Parameters
-    ----------
-    documents : List[dict]
-        Output of ``01_documents.load_documents``.
-
-    Returns
-    -------
-    List[dict]
-        One dict per chunk with keys: chunk_id, document_id, title, source,
-        category, last_updated, target_species, url_reference, chunk_index,
-        chunk_text (cleaned), raw_chunk_text (original), search_text
-        (header + title + category + cleaned content, used for embedding
-        and lexical search).
-    """
+  
     chunk_rows: List[dict] = []
 
     for doc in documents:

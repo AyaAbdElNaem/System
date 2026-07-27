@@ -1,15 +1,3 @@
-"""
-05_create_chroma_store.py
-===========================
-Stage 5 of the RAG pipeline: VECTOR STORE.
-
-Builds (or loads) a persistent ChromaDB collection. The database is only
-rebuilt when the knowledge base has actually changed (tracked via a content
-hash written to ``database/source_hash.json``) or when the caller explicitly
-requests ``force_rebuild=True`` - e.g. from the "Rebuild Database" button in
-the Streamlit sidebar.
-"""
-
 from __future__ import annotations
 
 import json
@@ -86,26 +74,7 @@ def _write_stored_hash(hash_value: str, num_documents: int, num_chunks: int) -> 
 
 
 def get_or_build_collection(force_rebuild: bool = False):
-    """
-    Return a ready-to-query Chroma collection, (re)building it if needed.
-
-    Parameters
-    ----------
-    force_rebuild : bool
-        If True, always rebuild from scratch regardless of whether the
-        knowledge base changed (used by the sidebar's "Rebuild Database"
-        button).
-
-    Returns
-    -------
-    chromadb.Collection
-
-    Raises
-    ------
-    VectorStoreError
-        Wraps any underlying loading/chunking/embedding/Chroma failure with
-        a clearer message for the UI to display.
-    """
+    
     try:
         client = _get_client()
         documents = load_documents(DATA_DIR)
@@ -177,10 +146,7 @@ def get_or_build_collection(force_rebuild: bool = False):
 
 
 def get_collection_stats() -> dict:
-    """
-    Return knowledge-base / database status for display in the Streamlit
-    sidebar, without forcing a rebuild.
-    """
+
     stored = _read_stored_hash()
     client = None
     collection_exists = False

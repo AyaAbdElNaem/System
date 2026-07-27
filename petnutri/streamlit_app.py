@@ -1,14 +1,3 @@
-"""
-streamlit_app.py
-==================
-PetNutri - AI Pet Nutrition Assistant.
-
-Wires together the RAG pipeline stages (01-07) into a Streamlit UI that
-matches the PetNutri design reference: a cream-toned landing page with an
-olive "Start AI Consultation" button, and a chat/consultation page with a
-badge, headline, streaming assistant replies, and source citations.
-"""
-
 from __future__ import annotations
 
 import os
@@ -36,6 +25,7 @@ classify_query = _prompting.classify_query
 get_casual_response = _prompting.get_casual_response
 stream_answer = _prompting.stream_answer
 GenerationError = _prompting.GenerationError
+NO_ANSWER_SENTENCE = _prompting.NO_ANSWER_SENTENCE
 
 try:
     from config import APP_TITLE, STYLE_CSS_PATH, get_openrouter_credentials
@@ -108,35 +98,18 @@ def go_to(page: str) -> None:
 # --------------------------------------------------------------------------
 def render_sidebar() -> None:
     with st.sidebar:
-        st.markdown('<div class="pn-sidebar-title">🐾 Knowledge Base</div>', unsafe_allow_html=True)
+        st.markdown('<div class="pn-sidebar-title">🐾 PetNutri</div>', unsafe_allow_html=True)
 
+        # Knowledge-base status (documents/chunks/embedding model/last built)
+        # is intentionally not rendered in the UI - kept internal only, so
+        # we still know whether the database is ready to gate chat.
         try:
             stats = get_collection_stats()
+            st.session_state.db_ready = stats["database_ready"]
         except Exception as exc:  # noqa: BLE001
+            st.session_state.db_ready = False
             st.error(f"Could not read database status: {exc}")
-            stats = None
 
-        if stats:
-            status_ok = stats["database_ready"]
-            dot_class = "ok" if status_ok else "bad"
-            status_label = "Ready" if status_ok else "Not built yet"
-            st.markdown(
-                f"""
-                <div class="pn-status-row"><span>Status</span>
-                    <span class="value"><span class="pn-status-dot {dot_class}"></span>{status_label}</span></div>
-                <div class="pn-status-row"><span>Documents</span><span class="value">{stats['num_documents']}</span></div>
-                <div class="pn-status-row"><span>Chunks</span><span class="value">{stats['num_chunks']}</span></div>
-                <div class="pn-status-row"><span>Embedding model</span><span class="value">{stats['embedding_model']}</span></div>
-                <div class="pn-status-row"><span>Last built</span><span class="value">{stats['last_built']}</span></div>
-                """,
-                unsafe_allow_html=True,
-            )
-            st.session_state.db_ready = status_ok
-
-        _, api_model = get_openrouter_credentials()
-        st.caption(f"Generation model: `{api_model}`")
-
-        st.markdown("<br>", unsafe_allow_html=True)
         if st.button("🔄 Rebuild Database", use_container_width=True, type="secondary"):
             with st.spinner("Rebuilding the vector database..."):
                 try:
@@ -278,8 +251,7 @@ def handle_submission(user_text: str) -> None:
 def render_chat() -> None:
     st.markdown(
         f"""
-        <div class="pn-topbar">
-            <div class="pn-back-link">← Back to Home</div>
+        <div class="pn-topbar" style="justify-content: flex-end;">
             <div class="pn-logo">{_PAW_ICON} {APP_TITLE}</div>
         </div>
         """,

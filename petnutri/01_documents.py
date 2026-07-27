@@ -1,19 +1,3 @@
-"""
-01_documents.py
-================
-Stage 1 of the RAG pipeline: DOCUMENTS.
-
-Loads the raw Markdown knowledge base and attaches curated metadata to each
-file. This preserves the exact metadata scheme from the original project
-code (title, source, category, last_updated, target_species, url_reference)
-so downstream citations keep working unchanged.
-
-Public API
-----------
-load_documents(data_dir) -> List[dict]
-compute_documents_hash(documents) -> str
-"""
-
 from __future__ import annotations
 
 import hashlib
@@ -80,25 +64,7 @@ class DocumentLoadError(Exception):
 
 
 def load_documents(data_dir: Union[str, Path] = DATA_DIR) -> List[dict]:
-    """
-    Load every ``*.md`` file under ``data_dir`` and attach curated metadata.
-
-    Parameters
-    ----------
-    data_dir : str | Path
-        Folder containing the Markdown knowledge base files.
-
-    Returns
-    -------
-    List[dict]
-        One dict per document with keys: document_id, file_name, title,
-        source, category, last_updated, target_species, url_reference, text.
-
-    Raises
-    ------
-    DocumentLoadError
-        If the directory does not exist or contains no Markdown files.
-    """
+    
     data_dir = Path(data_dir)
 
     if not data_dir.exists():

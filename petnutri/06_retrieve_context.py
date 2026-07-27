@@ -1,21 +1,3 @@
-"""
-06_retrieve_context.py
-========================
-Stage 6 of the RAG pipeline: CONTEXT RETRIEVAL.
-
-Reproduces the original notebook's hybrid retriever (BM25 lexical score +
-SentenceTransformer semantic score, min-max normalized and combined with
-weight ``alpha``) on top of ChromaDB as the storage layer, then packs the
-top, deduplicated chunks into a citation-ready context block - identical
-selection logic to the original ``build_context_package`` (word budget +
-max chunk count).
-
-Public API
-----------
-retrieve_hybrid(query, collection, k, alpha) -> list[dict]
-build_context_package(query, collection, ...) -> dict
-"""
-
 from __future__ import annotations
 
 import re
@@ -31,12 +13,22 @@ _vectors = load_stage("04_vector_representation")
 embed_query = _vectors.embed_query
 
 try:
-    from config import DEFAULT_ALPHA, DEFAULT_MAX_CHUNKS, DEFAULT_TOP_K, DEFAULT_WORD_BUDGET
+    from config import (
+        DEFAULT_ALPHA,
+        DEFAULT_MAX_CHUNKS,
+        DEFAULT_MIN_ABSOLUTE_SCORE,
+        DEFAULT_MIN_SCORE_RATIO,
+        DEFAULT_TOP_K,
+        DEFAULT_WORD_BUDGET,
+    )
 except ImportError:
     DEFAULT_TOP_K = 6
     DEFAULT_ALPHA = 0.5
     DEFAULT_MAX_CHUNKS = 4
     DEFAULT_WORD_BUDGET = 350
+    DEFAULT_MIN_ABSOLUTE_SCORE = 0.12
+    DEFAULT_MIN_SCORE_RATIO = 0.4
+
 
 
 def _simple_tokenize(text: str) -> List[str]:
@@ -55,12 +47,7 @@ class RetrievalError(Exception):
 
 
 def _fetch_corpus(collection):
-    """
-    Pull the full collection contents (documents, metadatas, embeddings)
-    into memory once. The knowledge base is small (a few hundred chunks),
-    so this mirrors the original notebook's in-memory hybrid search while
-    still persisting everything durably in ChromaDB.
-    """
+    
     result = collection.get(include=["documents", "metadatas", "embeddings"])
     if not result["ids"]:
         raise RetrievalError(
@@ -76,29 +63,7 @@ def retrieve_hybrid(
     k: int = DEFAULT_TOP_K,
     alpha: float = DEFAULT_ALPHA,
 ) -> List[dict]:
-    """
-    Rank every chunk in the collection against ``query`` using a weighted
-    combination of BM25 (lexical) and semantic (embedding cosine
-    similarity) scores, and return the top ``k``.
-
-    Parameters
-    ----------
-    query : str
-        The user's question.
-    collection : chromadb.Collection
-        An already-built collection (see 05_create_chroma_store.py).
-    k : int
-        Number of top-ranked chunks to return.
-    alpha : float
-        Weight given to the lexical (BM25) score; ``1 - alpha`` is given to
-        the semantic score. 0.5 weighs both equally.
-
-    Returns
-    -------
-    List[dict]
-        Chunks sorted by descending hybrid score, each with its metadata
-        and a ``score`` field.
-    """
+   
     if not query or not query.strip():
         raise RetrievalError("Empty query - nothing to retrieve.")
 
@@ -139,20 +104,23 @@ def build_context_package(
     alpha: float = DEFAULT_ALPHA,
     max_chunks: int = DEFAULT_MAX_CHUNKS,
     word_budget: int = DEFAULT_WORD_BUDGET,
+    min_absolute_score: float = DEFAULT_MIN_ABSOLUTE_SCORE,
+    min_score_ratio: float = DEFAULT_MIN_SCORE_RATIO,
 ) -> dict:
-    """
-    Retrieve, deduplicate, and word-budget-pack context for a query -
-    identical selection strategy to the original notebook's
-    ``build_context_package``.
-
-    Returns
-    -------
-    dict with keys:
-        - context_text: str, ready to drop into the LLM prompt
-        - sources: List[dict], one per selected chunk (for citation display)
-        - used_words: int
-    """
+    
     candidates = retrieve_hybrid(query, collection, k=k, alpha=alpha)
+
+    if not candidates or candidates[0]["score"] < min_absolute_score:
+        return {
+            "context_text": "",
+            "sources": [],
+            "used_words": 0,
+            "has_sufficient_context": False,
+        }
+
+    top_score = candidates[0]["score"]
+    score_floor = max(min_absolute_score, min_score_ratio * top_score)
+    candidates = [row for row in candidates if row["score"] >= score_floor]
 
     selected = []
     seen_texts = set()
@@ -198,6 +166,7 @@ def build_context_package(
         "context_text": "\n\n".join(context_blocks),
         "sources": sources,
         "used_words": used_words,
+        "has_sufficient_context": bool(selected),
     }
 
 

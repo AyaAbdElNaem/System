@@ -1,23 +1,3 @@
-"""
-02_preprocessing.py
-====================
-Stage 2 of the RAG pipeline: PREPROCESSING.
-
-Two levels of cleaning are applied, matching (and slightly hardening) the
-original notebook logic:
-
-1. ``normalize_raw_text`` - light normalization run on a whole document
-   *before* header/recursive splitting (fixes CRLF line endings from the
-   uploaded .md files, trims trailing whitespace). This does not touch
-   Markdown headers, so the header-aware splitter in 03_chunking.py keeps
-   working correctly.
-2. ``clean_chunk_text`` - the original aggressive cleaning function
-   (lowercase, strip non-alphanumeric symbols except a few kept for units
-   like ``%``, ``+``, ``/``, ``=``, ``<``, ``>``) applied to each chunk
-   *after* splitting, exactly as in the original code's
-   ``clean_final_chunk``.
-"""
-
 from __future__ import annotations
 
 import re

@@ -1,19 +1,3 @@
-"""
-07_prompting.py
-=================
-Stage 7 of the RAG pipeline: PROMPTING & GENERATION.
-
-Responsibilities:
-1. Classify incoming messages as "casual" (greetings/small talk) or
-   "knowledge" (an actual nutrition question) so the retriever is only
-   invoked when it's actually needed.
-2. Build the strict, grounded RAG prompt (same rules as the original
-   notebook: answer only from context, refuse if insufficient, always cite
-   sources).
-3. Call OpenRouter's chat-completions endpoint (streaming) using the API
-   key from Streamlit secrets / environment variables.
-"""
-
 from __future__ import annotations
 
 import json
@@ -71,11 +55,6 @@ def classify_query(text: str) -> str:
     """
     Classify a user message as ``"casual"`` or ``"knowledge"``.
 
-    Casual conversation (greetings, thanks, small talk) never triggers the
-    retriever - only genuine nutrition questions do. When in doubt (e.g.
-    the message is longer than a few words, or asks something), we treat
-    it as a knowledge question so we never silently skip retrieval for a
-    real question.
     """
     normalized = text.strip().lower()
     if not normalized:
@@ -85,8 +64,7 @@ def classify_query(text: str) -> str:
         if re.match(pattern, normalized):
             return "casual"
 
-    # Very short inputs with no question mark and no nutrition-ish keywords
-    # are more likely small talk than a real question.
+  
     word_count = len(normalized.split())
     has_question_mark = "?" in normalized
     if word_count <= 3 and not has_question_mark:
@@ -128,11 +106,12 @@ def get_casual_response(text: str) -> str:
 
 
 # --------------------------------------------------------------------------
-# 2. Strict, grounded prompt template (unchanged rules from the original)
+# 2. Strict, grounded prompt template 
 # --------------------------------------------------------------------------
 _NO_ANSWER_SENTENCE = (
     "The provided sources do not contain enough information to answer this question."
 )
+NO_ANSWER_SENTENCE = _NO_ANSWER_SENTENCE
 
 _SYSTEM_PROMPT = (
     "You are PetNutri, a grounded RAG assistant specialized in veterinary "
@@ -176,19 +155,7 @@ def stream_answer(
     model: Optional[str] = None,
     temperature: float = 0.0,
 ) -> Generator[str, None, None]:
-    """
-    Stream the LLM's answer token-by-token (as text chunks) from OpenRouter.
-
-    Yields
-    ------
-    str
-        Incremental text chunks. Concatenate them to get the full answer.
-
-    Raises
-    ------
-    GenerationError
-        If no API key is configured, or the HTTP request fails.
-    """
+   
     resolved_key, resolved_model = get_openrouter_credentials()
     api_key = api_key or resolved_key
     model = model or resolved_model or DEFAULT_OPENROUTER_MODEL
