@@ -230,6 +230,10 @@ def handle_submission(user_text: str) -> None:
         )
         return
 
+    if not package["has_sufficient_context"]:
+        st.session_state.messages.append({"role": "assistant", "content": NO_ANSWER_SENTENCE})
+        return
+
     try:
         answer_text = "".join(
             stream_answer(user_text, package["context_text"])
@@ -243,9 +247,14 @@ def handle_submission(user_text: str) -> None:
         )
         return
 
-    st.session_state.messages.append(
-        {"role": "assistant", "content": answer_text, "sources": package["sources"]}
-    )
+
+    _FALLBACK_MARKER = "do not contain enough information"
+    is_fallback_answer = _FALLBACK_MARKER in answer_text.strip().lower()
+    message = {"role": "assistant", "content": answer_text}
+    if not is_fallback_answer:
+        message["sources"] = package["sources"]
+    st.session_state.messages.append(message)
+
 
 
 def render_chat() -> None:
